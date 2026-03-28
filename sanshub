@@ -1,83 +1,167 @@
--- LocalScript (StarterGui or StarterPlayerScripts)
+-- LocalScript (StarterGui)
 
 local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
 -- Create ScreenGui
 local gui = Instance.new("ScreenGui")
 gui.Name = "SansHub"
-gui.Parent = player:WaitForChild("PlayerGui")
+gui.ResetOnSpawn = false
+gui.Parent = playerGui
 
--- Main Frame (BIGGER)
+-- =====================
+-- INTRO SCREEN
+-- =====================
+local intro = Instance.new("Frame")
+intro.Size = UDim2.new(1,0,1,0)
+intro.BackgroundColor3 = Color3.fromRGB(0,0,0)
+intro.Parent = gui
+
+local introText = Instance.new("TextLabel")
+introText.Size = UDim2.new(1,0,1,0)
+introText.Text = "SANS HUB ★"
+introText.TextScaled = true
+introText.TextColor3 = Color3.fromRGB(255,255,255)
+introText.BackgroundTransparency = 1
+introText.Font = Enum.Font.GothamBold
+introText.Parent = intro
+
+-- Fade in
+intro.BackgroundTransparency = 1
+introText.TextTransparency = 1
+
+for i = 1, 20 do
+	intro.BackgroundTransparency -= 0.05
+	introText.TextTransparency -= 0.05
+	task.wait(0.03)
+end
+
+task.wait(5)
+
+-- Fade out
+for i = 1, 20 do
+	intro.BackgroundTransparency += 0.05
+	introText.TextTransparency += 0.05
+	task.wait(0.03)
+end
+
+intro:Destroy()
+
+-- =====================
+-- MAIN UI
+-- =====================
+
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 500, 0, 300)
-frame.Position = UDim2.new(0.5, -250, 0.5, -150)
-frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+frame.Size = UDim2.new(0, 520, 0, 320)
+frame.Position = UDim2.new(0.5, -260, 0.5, -160)
+frame.BackgroundColor3 = Color3.fromRGB(18,18,18)
 frame.Active = true
 frame.Draggable = true
 frame.Parent = gui
 
+-- Rounded corners
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = frame
+
+-- Outline
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(0,170,255)
+stroke.Thickness = 2
+stroke.Parent = frame
+
+-- Top bar (colored line)
+local topBar = Instance.new("Frame")
+topBar.Size = UDim2.new(1,0,0,6)
+topBar.BackgroundColor3 = Color3.fromRGB(0,170,255)
+topBar.BorderSizePixel = 0
+topBar.Parent = frame
+
+local topCorner = Instance.new("UICorner")
+topCorner.CornerRadius = UDim.new(0,12)
+topCorner.Parent = topBar
+
 -- Title
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 50)
-title.Text = "SANS HUB"
+title.Size = UDim2.new(1,0,0,50)
+title.Text = "SANS HUB ★"
 title.TextScaled = true
-title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
 title.TextColor3 = Color3.fromRGB(255,255,255)
+title.BackgroundTransparency = 1
 title.Parent = frame
 
--- Function to create buttons
-local function createButton(text, yPos)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 220, 0, 50)
-    btn.Position = UDim2.new(0, 20, 0, yPos)
-    btn.Text = text
-    btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-    btn.TextColor3 = Color3.fromRGB(255,255,255)
-    btn.Parent = frame
-    return btn
+-- Section Label
+local section = Instance.new("TextLabel")
+section.Size = UDim2.new(1,0,0,30)
+section.Position = UDim2.new(0,0,0,50)
+section.Text = "MAIN"
+section.Font = Enum.Font.GothamSemibold
+section.TextScaled = true
+section.TextColor3 = Color3.fromRGB(180,180,180)
+section.BackgroundTransparency = 1
+section.Parent = frame
+
+-- Button Creator
+local function createButton(text, y)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0, 240, 0, 50)
+	btn.Position = UDim2.new(0, 20, 0, y)
+	btn.BackgroundColor3 = Color3.fromRGB(35,35,35)
+	btn.TextColor3 = Color3.fromRGB(255,255,255)
+	btn.Font = Enum.Font.Gotham
+	btn.TextScaled = true
+	btn.Text = text
+	btn.Parent = frame
+
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0,10)
+	c.Parent = btn
+
+	return btn
 end
 
--- Example Buttons
-local carpetToggle = createButton("Flying Carpet: OFF", 70)
-local speedToggle = createButton("Speed Boost: OFF", 140)
-local jumpToggle = createButton("High Jump: OFF", 210)
+-- Buttons
+local carpetBtn = createButton("Flying Carpet: OFF", 100)
+local speedBtn = createButton("Speed Boost: OFF", 170)
+local jumpBtn = createButton("High Jump: OFF", 240)
 
 -- States
-local carpetOn = false
-local speedOn = false
-local jumpOn = false
+local carpet = false
+local speed = false
+local jump = false
 
-local playerChar = player.Character or player.CharacterAdded:Wait()
+local char = player.Character or player.CharacterAdded:Wait()
 
--- Flying Carpet Toggle (legit equip)
-carpetToggle.MouseButton1Click:Connect(function()
-    carpetOn = not carpetOn
-    carpetToggle.Text = "Flying Carpet: " .. (carpetOn and "ON" or "OFF")
+-- Carpet
+carpetBtn.MouseButton1Click:Connect(function()
+	carpet = not carpet
+	carpetBtn.Text = "Flying Carpet: " .. (carpet and "ON" or "OFF")
 
-    local tool = player.Backpack:FindFirstChild("Flying Carpet") or playerChar:FindFirstChild("Flying Carpet")
-    if tool then
-        tool.Parent = carpetOn and playerChar or player.Backpack
-    end
+	local tool = player.Backpack:FindFirstChild("Flying Carpet") or char:FindFirstChild("Flying Carpet")
+	if tool then
+		tool.Parent = carpet and char or player.Backpack
+	end
 end)
 
--- Speed Boost (legit stat change)
-speedToggle.MouseButton1Click:Connect(function()
-    speedOn = not speedOn
-    speedToggle.Text = "Speed Boost: " .. (speedOn and "ON" or "OFF")
+-- Speed
+speedBtn.MouseButton1Click:Connect(function()
+	speed = not speed
+	speedBtn.Text = "Speed Boost: " .. (speed and "ON" or "OFF")
 
-    local humanoid = playerChar:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        humanoid.WalkSpeed = speedOn and 32 or 16
-    end
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	if hum then
+		hum.WalkSpeed = speed and 32 or 16
+	end
 end)
 
--- High Jump
-jumpToggle.MouseButton1Click:Connect(function()
-    jumpOn = not jumpOn
-    jumpToggle.Text = "High Jump: " .. (jumpOn and "ON" or "OFF")
+-- Jump
+jumpBtn.MouseButton1Click:Connect(function()
+	jump = not jump
+	jumpBtn.Text = "High Jump: " .. (jump and "ON" or "OFF")
 
-    local humanoid = playerChar:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        humanoid.JumpPower = jumpOn and 100 or 50
-    end
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	if hum then
+		hum.JumpPower = jump and 100 or 50
+	end
 end)
