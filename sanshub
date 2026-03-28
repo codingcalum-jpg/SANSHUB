@@ -1,0 +1,57 @@
+-- LocalScript inside StarterPlayerScripts or StarterGui
+
+local player = game.Players.LocalPlayer
+local backpack = player:WaitForChild("Backpack")
+local character = player.Character or player.CharacterAdded:Wait()
+
+-- Create GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "SansHub"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- Main frame
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 300, 0, 200)
+frame.Position = UDim2.new(0.5, -150, 0.5, -100)
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+frame.Parent = screenGui
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Text = "SANS HUB"
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.BackgroundTransparency = 1
+title.Parent = frame
+
+-- Toggle Button
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 200, 0, 50)
+toggleButton.Position = UDim2.new(0.5, -100, 0.5, -25)
+toggleButton.Text = "Equip Flying Carpet: OFF"
+toggleButton.BackgroundColor3 = Color3.fromRGB(50,50,50)
+toggleButton.TextColor3 = Color3.fromRGB(255,255,255)
+toggleButton.Parent = frame
+
+local equipped = false
+
+toggleButton.MouseButton1Click:Connect(function()
+    equipped = not equipped
+    
+    local toolName = "Flying Carpet"
+    local tool = backpack:FindFirstChild(toolName) or character:FindFirstChild(toolName)
+
+    if equipped then
+        toggleButton.Text = "Equip Flying Carpet: ON"
+        
+        if tool then
+            tool.Parent = character -- equips tool
+        end
+    else
+        toggleButton.Text = "Equip Flying Carpet: OFF"
+        
+        if tool then
+            tool.Parent = backpack -- unequips tool
+        end
+    end
+end)
